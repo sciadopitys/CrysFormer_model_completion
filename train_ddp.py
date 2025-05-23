@@ -36,7 +36,7 @@ def set_seed(args,rank):
 
 def setup(rank, world_size):
     os.environ['MASTER_ADDR'] = 'localhost'
-    os.environ['MASTER_PORT'] = '12356'
+    os.environ['MASTER_PORT'] = '12355'
 
     # initialize the process group
     dist.init_process_group("nccl", rank=rank, world_size=world_size, timeout=datetime.timedelta(hours = 36))
@@ -98,7 +98,7 @@ class Dataset1(torch.utils.data.Dataset):
         
         
     def __len__(self):
-        return len(self.indices) - 1
+        return len(self.indices) - 3
         
 
 
@@ -226,7 +226,7 @@ def train(rank,args, test_datasets, n_test):
     
     n_epochs = args.total_epochs
     epoch = 0
-    accum = 1  #gradient accumulation
+    accum = 12 // args.world_size  #gradient accumulation
     
     optimizer = AdamWScheduleFree(model.parameters(), lr = learning_rate, weight_decay=3e-2, warmup_steps = 0)
     
@@ -376,7 +376,7 @@ def run_train(args, testset, n_test):
 if __name__ == "__main__":
     import argparse   
         
-    with open("test1.txt") as myfile: #select the first n_train examples as the training set, rest as validation set
+    with open("test.txt") as myfile: #select the first n_train examples as the training set, rest as validation set
         testlist = myfile.readlines()
     testlist = [x.rstrip() for x in testlist]        
         
