@@ -11,7 +11,7 @@ Introducing an initial dataset of small protein fragments taken from Protein Dat
 </p>
 
 ## Dataset Generation
-In the ground_truth directory, extract the files from into the 2_pdb directory.  
+In the ground_truth directory, extract the files from (https://doi.org/10.5281/zenodo.15498745) into the 2_pdb directory.  
 Then run the step3_mpi.sh, step4_mpi.sh,..., step9_mpi.sh scripts (4/5, 6/7, and 8/9 can be run in parallel). 
 Steps 3, 4, and 5 require that the ccp4 program suite is installed (https://www.ccp4.ac.uk/); source the path to the installed version of ccp4 in the third line in each of these scripts.
 This will populate the patterson_scaled and electron_density_scaled directories.
