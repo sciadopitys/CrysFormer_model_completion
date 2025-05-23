@@ -19,8 +19,11 @@ Similarly, in the partial_structure directory, extract the files in AF2-fragment
 
 ## Dependencies
 torch version >= 2.3.1
+
 einops version >= 0.8.1
+
 https://github.com/facebookresearch/schedule_free
+
 https://github.com/wimmerth/scale-equivariant-3d-convnet as scale_equivariant_3d_convnet
 
 ## Training
