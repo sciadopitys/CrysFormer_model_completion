@@ -1,4 +1,4 @@
-# Completion of Partial Structure Templates with Patterson Maps using the CrysFormer Model Architecture
+# Completion of partial structures using Patterson maps with the CrysFormer machine learning model
 
 Protein structure determination has long been one of the primary challenges of structural biology, to which deep machine learning-based approaches have increasingly been applied.
 However, these ML models generally do not incorporate the experimental measurements directly, such as X-ray crystallographic diffraction data. 
