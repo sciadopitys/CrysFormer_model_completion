@@ -17,7 +17,7 @@ Steps 3, 4, and 5 require that the ccp4 program suite is installed (https://www.
 This will populate the patterson_scaled and electron_density_scaled directories.
 Similarly, in the partial_structure directory, extract the files from https://doi.org/10.5281/zenodo.15498821 into 2_pdb, and then run the scripts for steps 3, 5, 7, and 9.
 This will populate the ps_alphafold_randdrop directory.
-These fragments are derived from entries in the AlphaFold Protein Structure Database, used under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) / extracted, residues renumbered, B-factors and aligned to ground truth fragments.
+These fragments are derived from entries in the [AlphaFold Protein Structure Database](https://alphafold.ebi.ac.uk/), used under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) / (with fragments extracted, residues renumbered, B-factors reset and residues aligned to their corresponding ground truth fragments).
 
 ## Dependencies
 torch version >= 2.3.1
