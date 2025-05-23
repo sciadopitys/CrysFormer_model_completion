@@ -16,7 +16,7 @@ Then run the step3_mpi.sh, step4_mpi.sh,..., step9_mpi.sh scripts (4/5, 6/7, and
 Steps 3, 4, and 5 require that the ccp4 program suite is installed (https://www.ccp4.ac.uk/); source the path to the installed version of ccp4 in the third line in each of these scripts.
 This will populate the patterson_scaled and electron_density_scaled directories.
 Similarly, in the partial_structure directory, extract the files from into 2_pdb, and then run the scripts for steps 3, 5, 7, and 9 to populate the ps_alphafold_randdrop directory.
-These fragments are derived from entries in the AlphaFold Protein Structure Database, used under (https://creativecommons.org/licenses/by/4.0/ "CC BY 4.0") / extracted, residues renumbered, B-factors and aligned to ground truth fragments.
+These fragments are derived from entries in the AlphaFold Protein Structure Database, used under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) / extracted, residues renumbered, B-factors and aligned to ground truth fragments.
 
 ## Dependencies
 torch version >= 2.3.1
