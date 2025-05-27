@@ -10,15 +10,6 @@ Introducing an initial dataset of small protein fragments taken from Protein Dat
   <img src="./images/4KT6_2.pd_131_start_4.png" alt="Model prediction compared with ground truth and partial structure atomic coordinates on a test set example"/>
 </p>
 
-## Dataset Generation
-In the ground_truth directory, extract the files from https://doi.org/10.5281/zenodo.15498745 into the 2_pdb directory.
-Then run the step3_mpi.sh, step4_mpi.sh,..., step9_mpi.sh scripts (4/5, 6/7, and 8/9 can be run in parallel). 
-Steps 3, 4, and 5 require that the ccp4 program suite is installed; source the path to the installed version of ccp4 in the third line in each of these scripts.
-This will populate the patterson_scaled and electron_density_scaled directories.
-Similarly, in the partial_structure directory, extract the files from https://doi.org/10.5281/zenodo.15498821 into 2_pdb, and then run the scripts for steps 3, 5, 7, and 9.
-This will populate the ps_alphafold_randdrop directory.
-These fragments are derived from entries in the [AlphaFold Protein Structure Database](https://alphafold.ebi.ac.uk/), used under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) / (with fragments extracted, residues renumbered, B-factors reset and residues aligned to their corresponding ground truth fragments).
-
 ## Dependencies
 Dataset Generation:
 
@@ -33,6 +24,15 @@ einops version >= 0.8.1
 https://github.com/facebookresearch/schedule_free
 
 https://github.com/wimmerth/scale-equivariant-3d-convnet as scale_equivariant_3d_convnet
+
+## Dataset Generation
+In the ground_truth directory, extract the files from https://doi.org/10.5281/zenodo.15498745 into the 2_pdb directory.
+Then run the step3_mpi.sh, step4_mpi.sh,..., step9_mpi.sh scripts (4/5, 6/7, and 8/9 can be run in parallel). 
+Steps 3, 4, and 5 require that the ccp4 program suite is installed; source the path to the installed version of ccp4 in the third line in each of these scripts.
+This will populate the patterson_scaled and electron_density_scaled directories.
+Similarly, in the partial_structure directory, extract the files from https://doi.org/10.5281/zenodo.15498821 into 2_pdb, and then run the scripts for steps 3, 5, 7, and 9.
+This will populate the ps_alphafold_randdrop directory.
+These fragments are derived from entries in the [AlphaFold Protein Structure Database](https://alphafold.ebi.ac.uk/), used under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) / (with fragments extracted, residues renumbered, B-factors reset and residues aligned to their corresponding ground truth fragments).
 
 ## Training
 Run train_ddp.py, setting the default value for the "world_size" argument on line 388 equal to the number of available gpus. 
