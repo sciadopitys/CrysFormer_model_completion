@@ -21,9 +21,11 @@ These fragments are derived from entries in the [AlphaFold Protein Structure Dat
 
 ## Dependencies
 Dataset Generation:
+
 [ccp4 program suite](https://www.ccp4.ac.uk/)
 
 Training:
+
 torch version >= 2.3.1
 
 einops version >= 0.8.1
