@@ -233,7 +233,7 @@ def train(rank,args, test_datasets, n_test):
     scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=max_learning_rate, steps_per_epoch=(len(train_loader) // accum), epochs=n_epochs, pct_start=0.05, three_phase= False, div_factor=(max_learning_rate/learning_rate), final_div_factor=0.525)
 
     #loading pretrained model    
-    #checkpoint = torch.load('state_15_p21_alphafold_randdrop_smallercell_recycle_5.pth')
+    #checkpoint = torch.load('state_final.pth')
     #model.load_state_dict(checkpoint['model_state_dict'])
 
     #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
