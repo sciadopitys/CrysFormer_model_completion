@@ -7,6 +7,8 @@ import os
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 import random
+
+# shuffle indices within a specified range of a list
 def shuffle_slice(a, start, stop):
     i = start
     while (i < (stop-1)):
@@ -16,24 +18,29 @@ def shuffle_slice(a, start, stop):
 
 
 def create_batches():
-    
+
+    # read in sorted list of training set example ids
     with open("train.txt") as myfile1: 
         trainlist = myfile1.readlines()
     trainlist  = [x.rstrip() for x in trainlist]
 
+    # read in list of indices separating examples of different tensor dimensions 
     with open("size_indices.txt") as myfile: 
         sindices = myfile.readlines()
     sindices  = [x.rstrip() for x in sindices]
-    
+
+    # shuffle examples within tensor dimension bins
     for i in range(len(sindices) - 1):
         start = int(sindices[i])
         end = int(sindices[i+1])
         shuffle_slice(trainlist, start, end)
 
+    # read in list of indices defining effective training batches
     with open("training_indices.txt") as myfile2: 
         indices = myfile2.readlines()
     indices  = [x.rstrip() for x in indices]
 
+    # create each training batch
     for i in range(len(indices) - 1):
         start = int(indices[i])
         end = int(indices[i+1])
@@ -42,31 +49,35 @@ def create_batches():
         ylist = []
         start_id1 = trainlist[start]
         start_id_split = start_id1.split("_")
-        new_scale = torch.tensor(int(start_id_split[-1])) 
+        new_scale = torch.tensor(int(start_id_split[-1])) # all examples in a training batch have the same scale
         for j in range(start, end):
             id1 = trainlist[j]
             id_split = id1.split("_")
             id = "_".join(id_split[:3])
             id_full = "_".join(id_split[:5])
             
-
+            # load in Patterson map
             new_x = torch.load('patterson_scaled/' + id + '_patterson.pt')
             new_x = torch.unsqueeze(new_x, 0)
 
+            # load in AFDB-derived partial structure template
             new_xlist = torch.load('ps_alphafold_randdrop/' + id_full + '_fft.pt')  
             new_xlist = torch.unsqueeze(new_xlist, 0)
             
             xlist.append(new_x)
             pslist.append(new_xlist)
             
-
+            # load in ground truth electron density
             new_y = torch.load('electron_density_scaled/' + id + '_fft.pt')
             new_y = torch.unsqueeze(new_y, 0)
             ylist.append(new_y)
 
+        # convert to PyTorch tensors
         data_x = torch.stack(xlist)
         data_ps = torch.stack(pslist)
         data_y = torch.stack(ylist)
+        
+        # save tensors defining training batch
         torch.save(data_x, 'batches/train_' + str(i) + '_patterson.pt')  
         torch.save(data_ps, 'batches/train_' + str(i) + '_ps.pt')
         torch.save(new_scale, 'batches/train_' + str(i) + '_scale.pt')
