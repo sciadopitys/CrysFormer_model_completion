@@ -61,11 +61,11 @@ def create_batches():
             new_x = torch.unsqueeze(new_x, 0)
 
             # load in AFDB-derived partial structure template
-            new_xlist = torch.load('ps_alphafold_randdrop/' + id_full + '_fft.pt')  
-            new_xlist = torch.unsqueeze(new_xlist, 0)
+            new_ps = torch.load('ps_alphafold_randdrop/' + id_full + '_fft.pt')  
+            new_ps = torch.unsqueeze(new_ps, 0)
             
             xlist.append(new_x)
-            pslist.append(new_xlist)
+            pslist.append(new_ps)
             
             # load in ground truth electron density
             new_y = torch.load('electron_density_scaled/' + id + '_fft.pt')
