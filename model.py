@@ -146,6 +146,20 @@ class Transformer_partial_structure(nn.Module):
                 
             return x
 
+#MIT License
+
+#Copyright (c) 2019 Andy Brock
+
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+
+#The above copyright notice and this permission notice shall be included in all
+#copies or substantial portions of the Software.
+
 # Post-transformer residual blocks
 class BigGANBlock(nn.Module):
 
@@ -345,5 +359,6 @@ class ViT_vary_encoder_decoder_partial_structure(nn.Module):
         x= x[:,:,pad_list[4]:(x.shape[2]-pad_list[5]),pad_list[2]:(x.shape[3]-pad_list[3]),pad_list[0]:(x.shape[4]-pad_list[1])]
         
         return(x)
+
 
 
