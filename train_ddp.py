@@ -431,7 +431,7 @@ if __name__ == "__main__":
     parser.add_argument('--max_image_depth',default=44, type=int, help='max size of Patterson/ground truth in third spatial dimension')
     parser.add_argument('--ps_size',default=[60, 68, 44], type=list, help='maximum size of partial structures')
     parser.add_argument('--patch_size',default=4, type=int, help='patch size (all dimensions)')
-    parser.add_argument('--activation',default='tanh', type=str, help='activation function')
+    parser.add_argument('--activation',default='tanh', type=str, help='final activation function')
 
     parser.add_argument('--dim',default=512, type=int, help='token embedding dimension')
     parser.add_argument('--depth',default=12, type=int, help='transformer depth')
@@ -464,5 +464,6 @@ if __name__ == "__main__":
     batch_gen.create_batches()
 
     run_train(args, test_datasets, n_test)
+
 
 
