@@ -55,7 +55,7 @@ class Dataset(torch.utils.data.Dataset):
   def __len__(self):
         return len(self.ids)
 
-  def __getitem__(self, index): # each example consists of patterson map, partial structure template, and scale identifier inputs, and output electron density 
+  def __getitem__(self, index): #each example consists of patterson map, partial structure template, and scale identifier inputs, and output electron density 
         
         ID1 = self.ids[index]
         
@@ -67,7 +67,7 @@ class Dataset(torch.utils.data.Dataset):
         X = torch.load('patterson_scaled/' + ID + '_patterson.pt')
         X = torch.unsqueeze(X, 0)
 
-        # load partial structure
+        # load partial structure template
         Xlist = torch.load('ps_alphafold_randdrop/' + ID_full + '_fft.pt') 
         Xlist = torch.unsqueeze(Xlist, 0)
 
@@ -118,7 +118,7 @@ def train(rank,args, test_datasets, n_test):
     torch.backends.cudnn.benchmark = False
     #print(torch.get_num_threads())
 
-    # create training set with size based on 
+    # create training set with size based on list of indices defining training batches
     with open("training_indices.txt") as myfile2:
         indices = myfile2.readlines()
     indlist  = [x.rstrip() for x in indices]
@@ -289,7 +289,7 @@ def train(rank,args, test_datasets, n_test):
                 # apply model to current example
                 yhat = model(x, ps, s)  
 
-                # evaluate and aadd loss function terms
+                # evaluate and add loss function terms
                 loss_1 = mse_wrapper_loss(yhat, y)                       
                 if loss_1.isnan().any():
                     raise Exception("nan")                
@@ -440,10 +440,11 @@ if __name__ == "__main__":
 
     parser.add_argument('--max_partial_structure',default=1, type=int, help='max number of partial structures')
     parser.add_argument('--same_partial_structure_emb', default = True, help='whether to use a constant partial structure embedding in each transformer layer')
-
-    parser.add_argument('--biggan_block_num',default=2, type=int, help='number of post-transformer BigGAN residual convolutional blocks')
     parser.add_argument('--downsample',default=2, type=int, help='number of times to downsample within transformer')
     parser.add_argument('--downsample_by',default=4, type=int, help='reduction in each spatial dimension for downsamples')
+
+    parser.add_argument('--biggan_block_num',default=2, type=int, help='number of post-transformer BigGAN residual convolutional blocks')
+
     args = parser.parse_args()
 
     assert (args.depth % 2) == 0, "depth must be even"
@@ -464,6 +465,7 @@ if __name__ == "__main__":
     batch_gen.create_batches()
 
     run_train(args, test_datasets, n_test)
+
 
 
 
