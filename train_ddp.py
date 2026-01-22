@@ -207,10 +207,10 @@ def train(rank,args, test_datasets, n_test):
         cost = (torch.sum(vx * vy) / (torch.sqrt(torch.sum(torch.square(vx))) * torch.sqrt(torch.sum(torch.square(vy)))))
         return cost
 
-    # create sampler and dataloaders
+    # Create sampler and dataloaders. Test set has batch size 1, training set effective batch size specified by generated batches
     sampler=DistributedSampler(dataset_train, shuffle = True, drop_last = True)
-    train_loader = torch.utils.data.DataLoader(dataset=dataset_train, shuffle = False, batch_size= args.batch_size, num_workers = 4, pin_memory = True, sampler=sampler)
-    test_loader = torch.utils.data.DataLoader(dataset=dataset_test, shuffle = False, batch_size= args.test_batch_size, num_workers = 4, pin_memory = True)
+    train_loader = torch.utils.data.DataLoader(dataset=dataset_train, shuffle = False, batch_size = 1, num_workers = 4, pin_memory = True, sampler=sampler)
+    test_loader = torch.utils.data.DataLoader(dataset=dataset_test, shuffle = False, batch_size = 1, num_workers = 4, pin_memory = True)
 
     # create model with specified hyperparameters and send it to current process' GPU
     model = ViT_vary_encoder_decoder_partial_structure(
@@ -218,7 +218,7 @@ def train(rank,args, test_datasets, n_test):
         num_partial_structure = args.max_partial_structure, 
         image_height = args.max_image_height,          
         image_width = args.max_image_width,
-        frames = args.max_frame_size,               
+        frames = args.max_image_depth,               
         image_patch_size = args.patch_size,     
         frame_patch_size = args.patch_size,  
         ps_size = args.ps_size,
@@ -389,7 +389,7 @@ def train(rank,args, test_datasets, n_test):
                 print("%d %.10f %.6f %.6f %.6f %.10f" % (epoch, (acc / n_train), curacc, curacc2, curacc3, scheduler.get_last_lr()[0]))  
 
                 # save current model state
-                if epoch >= 0:
+                if epoch == 0 or (epoch % args.save_every == 0):
                     torch.save({
                         'model_state_dict': model.state_dict(),
                         'optimizer_state_dict': optimizer.state_dict(),
@@ -422,43 +422,32 @@ if __name__ == "__main__":
 
     # specify default values for model and training hyperparameters (can also be specified in command line)
     parser = argparse.ArgumentParser(description='simple distributed training job')
-    parser.add_argument('--total_epochs', default=71, type=int, help='Total epochs to train the model')
-    parser.add_argument('--save_every', default=5, type=int, help='How often to save a snapshot')
-    parser.add_argument('--batch_size', default=1, type=int, help='Input batch size on each device (default: 32)')
-    parser.add_argument('--test_batch_size', default=1, type=int, help='Input batch size on each device (default: 32)')
-    parser.add_argument('--world_size', default=3, type=int, help='world size')
-    parser.add_argument('--seed', default=1, type=int, help='seed')
-    parser.add_argument('--lr_lambda', default=2, type=int, help='lr scheduler')
-    parser.add_argument('--max_frame_size',default=60, type=int, help='max size')
-    parser.add_argument('--max_image_height',default=68, type=int, help='max size')
-    parser.add_argument('--max_image_width',default=44, type=int, help='max size')
-    parser.add_argument('--ps_size',default=[60, 68, 44], type=list, help='max size')
-    parser.add_argument('--patch_size',default=4, type=int, help='patch size')
+    parser.add_argument('--total_epochs', default=71, type=int, help='Total epochs to train the model') # number of 
+    parser.add_argument('--save_every', default=1, type=int, help='How often to save a snapshot of the model state')
+    parser.add_argument('--world_size', default=3, type=int, help='world size (number of training processes)')
+    parser.add_argument('--seed', default=1, type=int, help='random seed')
+    parser.add_argument('--max_image_height',default=60, type=int, help='max size of Patterson/ground truth in first spatial dimension')
+    parser.add_argument('--max_image_width',default=68, type=int, help='max size of Patterson/ground truth in second spatial dimension')
+    parser.add_argument('--max_image_depth',default=44, type=int, help='max size of Patterson/ground truth in third spatial dimension')
+    parser.add_argument('--ps_size',default=[60, 68, 44], type=list, help='maximum size of partial structures')
+    parser.add_argument('--patch_size',default=4, type=int, help='patch size (all dimensions)')
     parser.add_argument('--activation',default='tanh', type=str, help='activation function')
-    parser.add_argument('--debug', action='store_true', help='debug')
-    parser.add_argument('--FFT', default = False, help='FFT')
-    parser.add_argument('--iFFT', default = False, help='FFT')
-    parser.add_argument('--FFT_skip', default = False, help='FFT')
-    parser.add_argument('--transformer', default='Nystromformer',type=str , help='transformer type: normal or Nystromformer')
-    parser.add_argument('--work_dir', default='', type=str,
-                    help='experiment directory.')
-    parser.add_argument('--save_pth', default = True, help='save_pth')
 
-    parser.add_argument('--dim',default=512, type=int, help='dim')
-    parser.add_argument('--depth',default=12, type=int, help='depth')
-    parser.add_argument('--heads',default=12, type=int, help='heads')
-    parser.add_argument('--mlp_dim',default=2048, type=int, help='mlp_dim')
+    parser.add_argument('--dim',default=512, type=int, help='token embedding dimension')
+    parser.add_argument('--depth',default=12, type=int, help='transformer depth')
+    parser.add_argument('--heads',default=12, type=int, help='number of attention heads')
+    parser.add_argument('--mlp_dim',default=2048, type=int, help='dimensionality within feedforward MLP')
 
-    parser.add_argument('--max_partial_structure',default=1, type=int, help='max number of partial_structure')
-    parser.add_argument('--same_partial_structure_emb', default = True, help='whether use same partial structure embeding layer each transformer layer')
+    parser.add_argument('--max_partial_structure',default=1, type=int, help='max number of partial structures')
+    parser.add_argument('--same_partial_structure_emb', default = True, help='whether to use a constant partial structure embedding in each transformer layer')
 
-    parser.add_argument('--biggan_block_num',default=2, type=int, help='number of additional biggan block')
-    parser.add_argument('--downsample',default=2, type=int, help='number of additional biggan block')
-    parser.add_argument('--downsample_by',default=4, type=int, help='number of additional biggan block')
+    parser.add_argument('--biggan_block_num',default=2, type=int, help='number of post-transformer BigGAN residual convolutional blocks')
+    parser.add_argument('--downsample',default=2, type=int, help='number of times to downsample within transformer')
+    parser.add_argument('--downsample_by',default=4, type=int, help='reduction in each spatial dimension for downsamples')
     args = parser.parse_args()
 
     assert (args.depth % 2) == 0, "depth must be even"
-    assert (args.depth % (2 * (args.downsample + 1))) == 0, "downsamples must evenly divide depth"
+    assert (args.depth % (2 * (args.downsample + 1))) == 0, "downsamples must evenly divide transformer depth"
     assert (args.downsample_by % args.patch_size) == 0, "must downsample by a multiple of patch size"
 
     # create full test set and split across processes
@@ -475,4 +464,5 @@ if __name__ == "__main__":
     batch_gen.create_batches()
 
     run_train(args, test_datasets, n_test)
+
 
