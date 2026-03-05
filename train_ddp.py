@@ -218,9 +218,8 @@ def train(rank,args, test_datasets, n_test):
         num_partial_structure = args.max_partial_structure, 
         image_height = args.max_image_height,          
         image_width = args.max_image_width,
-        frames = args.max_image_depth,               
+        image_depth = args.max_image_depth,               
         image_patch_size = args.patch_size,     
-        frame_patch_size = args.patch_size,  
         ps_size = args.ps_size,
         dim = args.dim,
         depth = args.depth,
@@ -465,6 +464,7 @@ if __name__ == "__main__":
     batch_gen.create_batches()
 
     run_train(args, test_datasets, n_test)
+
 
 
 
