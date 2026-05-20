@@ -228,7 +228,8 @@ def train(rank,args, test_datasets, n_test):
         same_partial_structure_emb=args.same_partial_structure_emb,
         dropout = 0.1,
         emb_dropout = 0.1,
-        biggan_block_num=args.biggan_block_num
+        biggan_block_num=args.biggan_block_num,
+        channels = 10
     ).to(device)
 
     # wrap model in DDP for data paralleliztion
