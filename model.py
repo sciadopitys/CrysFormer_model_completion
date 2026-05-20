@@ -184,7 +184,7 @@ class Transformer_partial_structure(nn.Module):
 # Post-transformer residual blocks
 class BigGANBlock(nn.Module):
 
-    def __init__(self, in_channels, out_channels, stride=1):
+    def __init__(self, in_channels, out_channels):
         super().__init__()
 
         self.in_channels=in_channels
@@ -211,7 +211,7 @@ class BigGANBlock(nn.Module):
         
         res=x
 
-        x = self.relu(x)
+        x = torch.nn.functional.relu(x)
         x = self.bn1(x)
         x = self.conv1(x)
         x = self.relu(x)
@@ -224,23 +224,21 @@ class BigGANBlock(nn.Module):
         x = self.bn4(x)
         x = self.conv4(x)
 
-        x = x + res
+        if self.in_channels == self.out_channels:
+            x = x + res
         return x
 
 class ViT_vary_encoder_decoder_partial_structure(nn.Module):
     def __init__(self, args, num_partial_structure, image_height, image_width, image_depth, image_patch_size, ps_size, dim, depth, heads, mlp_dim, same_partial_structure_emb, channels = 10, dim_head = 64, dropout = 0., emb_dropout = 0., biggan_block_num=2):
         super().__init__()
 
-        self.activation=args.activation
-        same_partial_structure_emb=args.same_partial_structure_emb
 
         # Define initial scale-equivariant convolutions on Patterson map and partial structure (scales currently hardcoded)
-        self.conv1 = conv.SESConv_Z3_H(in_channels = 1, out_channels = 10, kernel_size = 7, effective_size = 4, scales = [0.759313,1.0,0.887459,0.987854,0.803794,0.827597,0.923694,0.918319,0.797655,0.833723,0.829428,0.801383,0.854762,0.940347,0.968662,0.892938,0.780852,0.979999,0.816765,0.751273], padding = 3, padding_mode='circular', bias = False)
-        self.bn1 = normalization.SEBatchNorm(10)
-        channels=10
+        self.conv1 = conv.SESConv_Z3_H(in_channels = 1, out_channels = channels, kernel_size = 7, effective_size = 4, scales = [0.759313,1.0,0.887459,0.987854,0.803794,0.827597,0.923694,0.918319,0.797655,0.833723,0.829428,0.801383,0.854762,0.940347,0.968662,0.892938,0.780852,0.979999,0.816765,0.751273], padding = 3, padding_mode='circular', bias = False)
+        self.bn1 = normalization.SEBatchNorm(channels)
 
-        self.conv1_p = conv.SESConv_Z3_H(in_channels = 1, out_channels = 10, kernel_size = 7, effective_size = 4, scales = [0.759313,1.0,0.887459,0.987854,0.803794,0.827597,0.923694,0.918319,0.797655,0.833723,0.829428,0.801383,0.854762,0.940347,0.968662,0.892938,0.780852,0.979999,0.816765,0.751273], padding = 3, padding_mode='circular', bias = False)
-        self.bn1_p = normalization.SEBatchNorm(10)
+        self.conv1_p = conv.SESConv_Z3_H(in_channels = 1, out_channels = channels, kernel_size = 7, effective_size = 4, scales = [0.759313,1.0,0.887459,0.987854,0.803794,0.827597,0.923694,0.918319,0.797655,0.833723,0.829428,0.801383,0.854762,0.940347,0.968662,0.892938,0.780852,0.979999,0.816765,0.751273], padding = 3, padding_mode='circular', bias = False)
+        self.bn1_p = normalization.SEBatchNorm(channels)
 
         patch_height = patch_width = patch_depth = image_patch_size
 
@@ -288,6 +286,15 @@ class ViT_vary_encoder_decoder_partial_structure(nn.Module):
 
         self.conv2 = nn.Conv3d(in_channels=10, out_channels=1, kernel_size=3, padding=1)
 
+        # Allow different final activations
+        if args.activation=='tanh':
+            self.act_final = nn.Tanh()
+        elif args.activation=='sigmoid':
+            self.act_final = nn.Sigmoid()
+        elif args.activation=='relu':
+            self.act_final = nn.ReLU(inplace=True)
+        else:
+            self.act_final = nn.Identity()
 
     def forward(self, x, ps, scale):
         
@@ -338,6 +345,7 @@ class ViT_vary_encoder_decoder_partial_structure(nn.Module):
         b, n, _ = x.shape
 
         _ , num_partial_structure, _ ,_ ,_ = partial_structure.shape
+        assert num_partial_structure == 1
         # Initial scale-equivariant CNN on partial structures
         partial_structure = self.conv1_p(partial_structure)
         partial_structure = self.bn1_p(partial_structure)
@@ -361,15 +369,7 @@ class ViT_vary_encoder_decoder_partial_structure(nn.Module):
 
         x = self.conv2(x)
 
-        # Allow different final activations
-        if self.activation=='tanh':
-            x = torch.tanh(x)
-        elif self.activation=='sigmoid':
-            x = torch.sigmoid(x)
-        elif self.activation=='None':
-            x = x
-        elif self.activation=='relu':
-            x = torch.torch.nn.functional.relu(x)
+        x = self.act_final(x)
 
         # Extract out regions corresponding to unpadded dimensions
         x= x[:,:,pad_list[4]:(x.shape[2]-pad_list[5]),pad_list[2]:(x.shape[3]-pad_list[3]),pad_list[0]:(x.shape[4]-pad_list[1])]
