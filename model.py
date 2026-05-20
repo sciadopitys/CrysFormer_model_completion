@@ -232,6 +232,7 @@ class BigGANBlock(nn.Module):
             res = self.conv_sc(res)
 
         x = x + res
+        return x
 
 class ViT_vary_encoder_decoder_partial_structure(nn.Module):
     def __init__(self, args, num_partial_structure, image_height, image_width, image_depth, image_patch_size, ps_size, dim, depth, heads, mlp_dim, same_partial_structure_emb, channels = 10, dim_head = 64, dropout = 0., emb_dropout = 0., biggan_block_num=2):
