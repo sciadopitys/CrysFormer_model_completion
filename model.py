@@ -206,6 +206,10 @@ class BigGANBlock(nn.Module):
         self.bn4=nn.BatchNorm3d(out_channels)
 
         self.conv4=nn.Conv3d(out_channels, out_channels, kernel_size=1)
+        
+        self.learnable_sc = in_channels != out_channels
+        if self.learnable_sc:
+            self.conv_sc = nn.Conv3d(in_channels, out_channels, kernel_size=1, padding=0)
 
     def forward(self, x):
         
@@ -223,10 +227,11 @@ class BigGANBlock(nn.Module):
         x = self.relu(x)
         x = self.bn4(x)
         x = self.conv4(x)
+        
+        if self.learnable_sc:       
+            res = self.conv_sc(res)
 
-        if self.in_channels == self.out_channels:
-            x = x + res
-        return x
+        x = x + res
 
 class ViT_vary_encoder_decoder_partial_structure(nn.Module):
     def __init__(self, args, num_partial_structure, image_height, image_width, image_depth, image_patch_size, ps_size, dim, depth, heads, mlp_dim, same_partial_structure_emb, channels = 10, dim_head = 64, dropout = 0., emb_dropout = 0., biggan_block_num=2):
